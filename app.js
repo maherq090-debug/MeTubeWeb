@@ -93,6 +93,7 @@ function openVideo(videoId, title) {
     channelsContainer.innerHTML = `
         <div class="video-player" style="
             width: 100%;
+            margin: 0;
         ">
             <h2 style="
                 margin-bottom: 16px;
@@ -104,7 +105,6 @@ function openVideo(videoId, title) {
                 width: 100%;
                 aspect-ratio: 16 / 9;
                 background: #000;
-                border-radius: 10px;
                 overflow: hidden;
             ">
                 <iframe
@@ -112,8 +112,7 @@ function openVideo(videoId, title) {
                     title="${title}"
                     style="
                         position: absolute;
-                        top: 0;
-                        left: 0;
+                        inset: 0;
                         width: 100%;
                         height: 100%;
                         border: none;
