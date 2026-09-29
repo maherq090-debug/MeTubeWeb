@@ -1,10 +1,19 @@
-const channelsContainer = document.getElementById("channelsContainer");
 const themeButton = document.getElementById("themeButton");
 
 const API_BASE_URL = "https://metube-api.maherq090.workers.dev";
 
-function displayChannels() {
-    channelsContainer.innerHTML = "";
+let currentChannel = null;
+
+function showChannels() {
+    const main = document.querySelector(".main");
+
+    main.innerHTML = `
+        <h2>Channels</h2>
+
+        <div id="channelsContainer" class="channels-container"></div>
+    `;
+
+    const container = document.getElementById("channelsContainer");
 
     channels.forEach(channel => {
         const card = document.createElement("div");
@@ -23,14 +32,28 @@ function displayChannels() {
             loadChannelVideos(channel);
         });
 
-        channelsContainer.appendChild(card);
+        container.appendChild(card);
     });
 }
 
 async function loadChannelVideos(channel) {
-    channelsContainer.innerHTML = `
-        <p>جاري تحميل الفيديوهات...</p>
+    currentChannel = channel;
+
+    const main = document.querySelector(".main");
+
+    main.innerHTML = `
+        <button class="back-button" id="backToChannels" type="button">
+            ← Back
+        </button>
+
+        <h2>${channel.name}</h2>
+
+        <div id="channelsContainer" class="channels-container">
+            <p>جاري تحميل الفيديوهات...</p>
+        </div>
     `;
+
+    const container = document.getElementById("channelsContainer");
 
     try {
         const response = await fetch(
@@ -48,21 +71,27 @@ async function loadChannelVideos(channel) {
     } catch (error) {
         console.error(error);
 
-        channelsContainer.innerHTML = `
+        container.innerHTML = `
             <p>حدث خطأ أثناء تحميل الفيديوهات.</p>
         `;
     }
+
+    document.getElementById("backToChannels").addEventListener("click", () => {
+        showChannels();
+    });
 }
 
 function displayVideos(videos, channel) {
+    const container = document.getElementById("channelsContainer");
+
     if (videos.length === 0) {
-        channelsContainer.innerHTML = `
+        container.innerHTML = `
             <p>لا توجد فيديوهات متاحة.</p>
         `;
         return;
     }
 
-    channelsContainer.innerHTML = "";
+    container.innerHTML = "";
 
     videos.forEach(video => {
         const videoId = video.id.videoId;
@@ -82,18 +111,20 @@ function displayVideos(videos, channel) {
         `;
 
         card.addEventListener("click", () => {
-            openVideo(videoId, title);
+            openVideo(videoId, title, channel);
         });
 
-        channelsContainer.appendChild(card);
+        container.appendChild(card);
     });
 }
 
-function openVideo(videoId, title) {
-    document.querySelector(".main").innerHTML = `
+function openVideo(videoId, title, channel) {
+    const main = document.querySelector(".main");
+
+    main.innerHTML = `
         <div class="video-page">
 
-            <button class="back-button" onclick="displayChannels()">
+            <button class="back-button" id="backToVideos" type="button">
                 ← Back
             </button>
 
@@ -110,6 +141,10 @@ function openVideo(videoId, title) {
 
         </div>
     `;
+
+    document.getElementById("backToVideos").addEventListener("click", () => {
+        loadChannelVideos(channel);
+    });
 }
 
 function toggleTheme() {
@@ -124,4 +159,4 @@ function toggleTheme() {
 
 themeButton.addEventListener("click", toggleTheme);
 
-displayChannels();
+showChannels();
