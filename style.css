@@ -57,7 +57,7 @@ body {
     gap: 20px;
 }
 
-/* Channel card */
+/* Channel and video cards */
 
 .channel-card {
     border: 1px solid #e5e5e5;
@@ -87,6 +87,45 @@ body {
     font-size: 17px;
 }
 
+/* Video page */
+
+.video-page {
+    width: 100%;
+}
+
+.video-page h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    line-height: 1.4;
+}
+
+.back-button {
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.video-wrapper {
+    width: 100%;
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #000000;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
 /* Dark mode */
 
 body.dark {
@@ -107,22 +146,6 @@ body.dark .channel-card-content h3 {
     color: #ffffff;
 }
 
-/* Video player */
-
-.video-player {
-    width: 100vw;
-    max-width: 100vw;
-    margin-left: calc(50% - 50vw);
-}
-
-.video-player h2 {
-    padding-left: 24px;
-    padding-right: 24px;
-}
-
-/* Keep video responsive */
-
-.video-player > div {
-    width: 100%;
-    aspect-ratio: 16 / 9;
+body.dark .video-wrapper {
+    background: #000000;
 }
