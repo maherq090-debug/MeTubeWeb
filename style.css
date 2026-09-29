@@ -106,3 +106,23 @@ body.dark .channel-card {
 body.dark .channel-card-content h3 {
     color: #ffffff;
 }
+
+/* Video player */
+
+.video-player {
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+}
+
+.video-player h2 {
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+/* Keep video responsive */
+
+.video-player > div {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+}
