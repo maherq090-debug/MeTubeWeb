@@ -1,6 +1,6 @@
 const channels = [
     {
         name: "Test Channel",
-        id: "UC_TEST_CHANNEL"
+        image: "https://via.placeholder.com/640x360"
     }
 ];
