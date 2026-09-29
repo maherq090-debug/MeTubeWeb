@@ -1,4 +1,5 @@
 const channelsContainer = document.getElementById("channelsContainer");
+const themeButton = document.getElementById("themeButton");
 
 function displayChannels() {
     channelsContainer.innerHTML = "";
@@ -17,5 +18,17 @@ function displayChannels() {
         channelsContainer.appendChild(card);
     });
 }
+
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+
+    if (document.body.classList.contains("dark")) {
+        themeButton.textContent = "☀️";
+    } else {
+        themeButton.textContent = "🌙";
+    }
+}
+
+themeButton.addEventListener("click", toggleTheme);
 
 displayChannels();
