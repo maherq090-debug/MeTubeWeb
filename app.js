@@ -91,19 +91,29 @@ function displayVideos(videos, channel) {
 
 function openVideo(videoId, title) {
     channelsContainer.innerHTML = `
-        <div class="video-player">
-            <h2>${title}</h2>
+        <div class="video-player" style="
+            width: 100%;
+        ">
+            <h2 style="
+                margin-bottom: 16px;
+                font-size: 22px;
+            ">${title}</h2>
 
             <div style="
                 position: relative;
                 width: 100%;
                 aspect-ratio: 16 / 9;
                 background: #000;
+                border-radius: 10px;
+                overflow: hidden;
             ">
                 <iframe
                     src="https://www.youtube.com/embed/${videoId}?autoplay=1"
                     title="${title}"
                     style="
+                        position: absolute;
+                        top: 0;
+                        left: 0;
                         width: 100%;
                         height: 100%;
                         border: none;
