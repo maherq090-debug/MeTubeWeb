@@ -1,5 +1,6 @@
 const channels = [
     {
-        name: "Test Channel"
+        name: "دوباميكافين",
+        id: "UCJlu6BjPWHZhzuCc0zVME0Q"
     }
 ];
