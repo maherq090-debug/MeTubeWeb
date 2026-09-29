@@ -13,7 +13,7 @@ function displayChannels() {
 
         card.innerHTML = `
             ${channel.image ? `<img src="${channel.image}" alt="${channel.name}">` : ""}
-            
+
             <div class="channel-card-content">
                 <h3>${channel.name}</h3>
             </div>
@@ -75,7 +75,7 @@ function displayVideos(videos, channel) {
 
         card.innerHTML = `
             ${thumbnail ? `<img src="${thumbnail}" alt="${title}">` : ""}
-            
+
             <div class="channel-card-content">
                 <h3>${title}</h3>
             </div>
@@ -90,37 +90,24 @@ function displayVideos(videos, channel) {
 }
 
 function openVideo(videoId, title) {
-    channelsContainer.innerHTML = `
-        <div class="video-player" style="
-            width: 100%;
-            margin: 0;
-        ">
-            <h2 style="
-                margin-bottom: 16px;
-                font-size: 22px;
-            ">${title}</h2>
+    document.querySelector(".main").innerHTML = `
+        <div class="video-page">
 
-            <div style="
-                position: relative;
-                width: 100%;
-                aspect-ratio: 16 / 9;
-                background: #000;
-                overflow: hidden;
-            ">
+            <button class="back-button" onclick="displayChannels()">
+                ← Back
+            </button>
+
+            <h2>${title}</h2>
+
+            <div class="video-wrapper">
                 <iframe
                     src="https://www.youtube.com/embed/${videoId}?autoplay=1"
                     title="${title}"
-                    style="
-                        position: absolute;
-                        inset: 0;
-                        width: 100%;
-                        height: 100%;
-                        border: none;
-                    "
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
                 </iframe>
             </div>
+
         </div>
     `;
 }
