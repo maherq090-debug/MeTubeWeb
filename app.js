@@ -10,7 +10,7 @@ function displayChannels() {
         card.className = "channel-card";
 
         card.innerHTML = `
-            <img src="${channel.image}" alt="${channel.name}">
+            ${channel.image ? `<img src="${channel.image}" alt="${channel.name}">` : ""}
             
             <div class="channel-card-content">
                 <h3>${channel.name}</h3>
