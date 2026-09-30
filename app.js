@@ -8,6 +8,7 @@ let currentVideos = [];
 
 let channelData = [];
 
+
 /* =========================
    Screen Wake Lock
 ========================= */
@@ -15,11 +16,15 @@ let channelData = [];
 let wakeLock = null;
 
 async function requestWakeLock() {
-    if (!("wakeLock" in navigator)) {
-        return;
-    }
-
     try {
+        if (!("wakeLock" in navigator)) {
+            return;
+        }
+
+        if (wakeLock !== null) {
+            return;
+        }
+
         wakeLock = await navigator.wakeLock.request("screen");
 
         wakeLock.addEventListener("release", () => {
@@ -27,36 +32,36 @@ async function requestWakeLock() {
         });
 
     } catch (error) {
-        console.log("Wake Lock could not be activated:", error);
+        console.log("Wake Lock unavailable:", error);
+        wakeLock = null;
     }
 }
 
 async function releaseWakeLock() {
-    if (wakeLock) {
-        try {
+    try {
+        if (wakeLock !== null) {
             await wakeLock.release();
-        } catch (error) {
-            console.log("Wake Lock release error:", error);
+            wakeLock = null;
         }
-
+    } catch (error) {
+        console.log("Wake Lock release error:", error);
         wakeLock = null;
     }
 }
 
 
 /* =========================
-   Re-acquire Wake Lock
+   Restore Wake Lock
    when page becomes visible
 ========================= */
 
-document.addEventListener("visibilitychange", async () => {
+document.addEventListener("visibilitychange", () => {
 
     if (
         document.visibilityState === "visible" &&
-        currentChannel &&
         document.querySelector(".video-page")
     ) {
-        await requestWakeLock();
+        requestWakeLock();
     }
 });
 
@@ -430,14 +435,7 @@ async function openVideo(
                 <iframe
                     src="https://www.youtube.com/embed/${videoId}?autoplay=1"
                     title="${title}"
-                    allow="
-                        accelerometer;
-                        autoplay;
-                        clipboard-write;
-                        encrypted-media;
-                        gyroscope;
-                        picture-in-picture
-                    "
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
                 </iframe>
 
@@ -447,9 +445,11 @@ async function openVideo(
     `;
 
     /*
-     * Keep the screen awake while watching.
+     * فقط هنا نطلب إبقاء الشاشة شغالة.
+     * إذا فشل Wake Lock، الفيديو والموقع
+     * يستمرون بالعمل بصورة طبيعية.
      */
-    await requestWakeLock();
+    requestWakeLock();
 
     document
         .getElementById("backToVideos")
@@ -472,3 +472,71 @@ async function openVideo(
 ========================= */
 
 function showChannelVideosAgain(channel) {
+
+    const main =
+        document.querySelector(".main");
+
+    main.innerHTML = `
+        <button
+            class="back-button"
+            id="backToChannels"
+            type="button"
+        >
+            ← Back
+        </button>
+
+        <h2>${channel.name}</h2>
+
+        <div
+            id="channelsContainer"
+            class="channels-container"
+        ></div>
+
+        <div id="loadMoreContainer"></div>
+    `;
+
+    document
+        .getElementById("backToChannels")
+        .addEventListener(
+            "click",
+            () => {
+                showChannels();
+            }
+        );
+
+    displayVideos(
+        currentVideos,
+        channel
+    );
+
+    updateLoadMoreButton();
+}
+
+
+/* =========================
+   Dark / Light Mode
+========================= */
+
+function toggleTheme() {
+
+    document.body.classList.toggle("dark");
+
+    if (
+        document.body.classList.contains("dark")
+    ) {
+        themeButton.textContent = "☀️";
+    } else {
+        themeButton.textContent = "🌙";
+    }
+}
+
+
+themeButton.addEventListener(
+    "click",
+    toggleTheme
+);
+
+
+/* =========================
+   Start App
+=========================
