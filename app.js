@@ -8,6 +8,58 @@ let currentVideos = [];
 
 let channelData = [];
 
+/* =========================
+   Screen Wake Lock
+========================= */
+
+let wakeLock = null;
+
+async function requestWakeLock() {
+    if (!("wakeLock" in navigator)) {
+        return;
+    }
+
+    try {
+        wakeLock = await navigator.wakeLock.request("screen");
+
+        wakeLock.addEventListener("release", () => {
+            wakeLock = null;
+        });
+
+    } catch (error) {
+        console.log("Wake Lock could not be activated:", error);
+    }
+}
+
+async function releaseWakeLock() {
+    if (wakeLock) {
+        try {
+            await wakeLock.release();
+        } catch (error) {
+            console.log("Wake Lock release error:", error);
+        }
+
+        wakeLock = null;
+    }
+}
+
+
+/* =========================
+   Re-acquire Wake Lock
+   when page becomes visible
+========================= */
+
+document.addEventListener("visibilitychange", async () => {
+
+    if (
+        document.visibilityState === "visible" &&
+        currentChannel &&
+        document.querySelector(".video-page")
+    ) {
+        await requestWakeLock();
+    }
+});
+
 
 /* =========================
    Load Channel Information
@@ -54,6 +106,11 @@ async function loadChannels() {
 ========================= */
 
 function showChannels() {
+
+    releaseWakeLock();
+
+    currentChannel = null;
+
     const main = document.querySelector(".main");
 
     main.innerHTML = `
@@ -98,6 +155,8 @@ function showChannels() {
 ========================= */
 
 async function loadChannelVideos(channel) {
+
+    await releaseWakeLock();
 
     currentChannel = channel;
 
@@ -344,7 +403,7 @@ function updateLoadMoreButton() {
    Video Player
 ========================= */
 
-function openVideo(
+async function openVideo(
     videoId,
     title,
     channel
@@ -387,11 +446,19 @@ function openVideo(
         </div>
     `;
 
+    /*
+     * Keep the screen awake while watching.
+     */
+    await requestWakeLock();
+
     document
         .getElementById("backToVideos")
         .addEventListener(
             "click",
-            () => {
+            async () => {
+
+                await releaseWakeLock();
+
                 showChannelVideosAgain(
                     channel
                 );
@@ -405,80 +472,3 @@ function openVideo(
 ========================= */
 
 function showChannelVideosAgain(channel) {
-
-    const main =
-        document.querySelector(".main");
-
-    main.innerHTML = `
-        <button
-            class="back-button"
-            id="backToChannels"
-            type="button"
-        >
-            ← Back
-        </button>
-
-        <h2>${channel.name}</h2>
-
-        <div
-            id="channelsContainer"
-            class="channels-container"
-        ></div>
-
-        <div id="loadMoreContainer"></div>
-    `;
-
-    document
-        .getElementById("backToChannels")
-        .addEventListener(
-            "click",
-            () => {
-                showChannels();
-            }
-        );
-
-    displayVideos(
-        currentVideos,
-        channel
-    );
-
-    updateLoadMoreButton();
-}
-
-
-/* =========================
-   Dark / Light Mode
-========================= */
-
-function toggleTheme() {
-
-    document.body.classList.toggle(
-        "dark"
-    );
-
-    if (
-        document.body.classList.contains(
-            "dark"
-        )
-    ) {
-
-        themeButton.textContent = "☀️";
-
-    } else {
-
-        themeButton.textContent = "🌙";
-    }
-}
-
-
-themeButton.addEventListener(
-    "click",
-    toggleTheme
-);
-
-
-/* =========================
-   Start App
-========================= */
-
-loadChannels();
