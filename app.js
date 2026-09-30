@@ -10,63 +10,6 @@ let channelData = [];
 
 
 /* =========================
-   Screen Wake Lock
-========================= */
-
-let wakeLock = null;
-
-async function requestWakeLock() {
-    try {
-        if (!("wakeLock" in navigator)) {
-            return;
-        }
-
-        if (wakeLock !== null) {
-            return;
-        }
-
-        wakeLock = await navigator.wakeLock.request("screen");
-
-        wakeLock.addEventListener("release", () => {
-            wakeLock = null;
-        });
-
-    } catch (error) {
-        console.log("Wake Lock unavailable:", error);
-        wakeLock = null;
-    }
-}
-
-async function releaseWakeLock() {
-    try {
-        if (wakeLock !== null) {
-            await wakeLock.release();
-            wakeLock = null;
-        }
-    } catch (error) {
-        console.log("Wake Lock release error:", error);
-        wakeLock = null;
-    }
-}
-
-
-/* =========================
-   Restore Wake Lock
-   when page becomes visible
-========================= */
-
-document.addEventListener("visibilitychange", () => {
-
-    if (
-        document.visibilityState === "visible" &&
-        document.querySelector(".video-page")
-    ) {
-        requestWakeLock();
-    }
-});
-
-
-/* =========================
    Load Channel Information
 ========================= */
 
@@ -111,11 +54,6 @@ async function loadChannels() {
 ========================= */
 
 function showChannels() {
-
-    releaseWakeLock();
-
-    currentChannel = null;
-
     const main = document.querySelector(".main");
 
     main.innerHTML = `
@@ -160,8 +98,6 @@ function showChannels() {
 ========================= */
 
 async function loadChannelVideos(channel) {
-
-    await releaseWakeLock();
 
     currentChannel = channel;
 
@@ -408,7 +344,7 @@ function updateLoadMoreButton() {
    Video Player
 ========================= */
 
-async function openVideo(
+function openVideo(
     videoId,
     title,
     channel
@@ -444,24 +380,16 @@ async function openVideo(
         </div>
     `;
 
-    /*
-     * فقط هنا نطلب إبقاء الشاشة شغالة.
-     * إذا فشل Wake Lock، الفيديو والموقع
-     * يستمرون بالعمل بصورة طبيعية.
-     */
-    requestWakeLock();
-
     document
         .getElementById("backToVideos")
         .addEventListener(
             "click",
-            async () => {
-
-                await releaseWakeLock();
+            () => {
 
                 showChannelVideosAgain(
                     channel
                 );
+
             }
         );
 }
@@ -524,8 +452,11 @@ function toggleTheme() {
     if (
         document.body.classList.contains("dark")
     ) {
+
         themeButton.textContent = "☀️";
+
     } else {
+
         themeButton.textContent = "🌙";
     }
 }
@@ -539,4 +470,6 @@ themeButton.addEventListener(
 
 /* =========================
    Start App
-=========================
+========================= */
+
+loadChannels();
