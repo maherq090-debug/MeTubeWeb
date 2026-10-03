@@ -27,6 +27,12 @@ const channels = [
         id: "UCyOfqgtsQaM3S-VZnsYnHjQ"
     },
     {
-        id: "UCFDyZk5q-EnGBGYlJis-VxA"
+        id: "UCmmMeGToU6ddpRgLm5Rhl9g"
+    },
+    {
+        id: "UCtRtnC1san8KShHG231AItg"
+    },
+    {
+        id: "UC9B6J4qn5M_TLMh7zX0ISBA"
     }
 ];
