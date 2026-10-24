@@ -55,6 +55,68 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
+      - name: Test background WebView playback
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path(
+              "node_modules/@capacitor/android/capacitor/src/main/java/"
+              "com/getcapacitor/BridgeActivity.java"
+          )
+
+          if not path.exists():
+              raise SystemExit(
+                  "BridgeActivity.java not found; Android source layout changed."
+              )
+
+          source = path.read_text()
+
+          old = """    @Override
+              public void onPause() {
+                  super.onPause();
+                  if (bridge != null) {
+                      this.bridge.onPause();
+                      Logger.debug("App paused");
+                  }
+              }"""
+
+          new = """    @Override
+              public void onPause() {
+                  super.onPause();
+
+                  if (bridge != null) {
+                      android.os.PowerManager powerManager =
+                          (android.os.PowerManager) getSystemService(POWER_SERVICE);
+
+                      android.app.KeyguardManager keyguardManager =
+                          (android.app.KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+
+                      boolean screenInteractive =
+                          powerManager != null && powerManager.isInteractive();
+
+                      boolean keyguardLocked =
+                          keyguardManager != null && keyguardManager.isKeyguardLocked();
+
+                      if (!screenInteractive || keyguardLocked) {
+                          this.bridge.onPause();
+                          Logger.debug("App paused: screen off or locked");
+                      } else {
+                          Logger.debug("App pause skipped: background playback test");
+                      }
+                  }
+              }"""
+
+          if old not in source:
+              raise SystemExit(
+                  "Could not safely patch BridgeActivity.onPause(); "
+                  "source differs from the expected version."
+              )
+
+          path.write_text(source.replace(old, new, 1))
+          print("Background playback experiment applied.")
+          PY
+
       - name: Generate app icons
         run: npx @capacitor/assets generate --android
 
