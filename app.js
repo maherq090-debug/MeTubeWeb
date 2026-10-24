@@ -1,3 +1,4 @@
+
 const themeButton = document.getElementById("themeButton");
 
 const API_BASE_URL = "https://metube-api.maherq090.workers.dev";
@@ -5,8 +6,33 @@ const API_BASE_URL = "https://metube-api.maherq090.workers.dev";
 let currentChannel = null;
 let nextPageToken = null;
 let currentVideos = [];
-
 let channelData = [];
+
+
+/* =========================
+   Keep Screen Awake
+========================= */
+
+async function setVideoScreenAwake(enabled) {
+    const keepAwake = window.metubeKeepAwake;
+
+    if (!keepAwake) {
+        return;
+    }
+
+    try {
+        if (enabled) {
+            await keepAwake.keepAwake();
+        } else {
+            await keepAwake.allowSleep();
+        }
+    } catch (error) {
+        console.error(
+            "Failed to update screen awake state:",
+            error
+        );
+    }
+}
 
 
 /* =========================
@@ -40,10 +66,7 @@ async function loadChannels() {
 
         main.innerHTML = `
             <h2>Channels</h2>
-
-            <p>
-                حدث خطأ أثناء تحميل القنوات.
-            </p>
+            <p>حدث خطأ أثناء تحميل القنوات.</p>
         `;
     }
 }
@@ -54,6 +77,8 @@ async function loadChannels() {
 ========================= */
 
 function showChannels() {
+    setVideoScreenAwake(false);
+
     const main = document.querySelector(".main");
 
     main.innerHTML = `
@@ -62,13 +87,10 @@ function showChannels() {
         <div id="channelsContainer" class="channels-container"></div>
     `;
 
-    const container =
-        document.getElementById("channelsContainer");
+    const container = document.getElementById("channelsContainer");
 
     channelData.forEach(channel => {
-
-        const card =
-            document.createElement("div");
+        const card = document.createElement("div");
 
         card.className = "channel-card";
 
@@ -98,15 +120,11 @@ function showChannels() {
 ========================= */
 
 async function loadChannelVideos(channel) {
-
     currentChannel = channel;
-
     nextPageToken = null;
-
     currentVideos = [];
 
-    const main =
-        document.querySelector(".main");
+    const main = document.querySelector(".main");
 
     main.innerHTML = `
         <button
@@ -119,10 +137,7 @@ async function loadChannelVideos(channel) {
 
         <h2>${channel.name}</h2>
 
-        <div
-            id="channelsContainer"
-            class="channels-container"
-        >
+        <div id="channelsContainer" class="channels-container">
             <p>جاري تحميل الفيديوهات...</p>
         </div>
 
@@ -144,12 +159,8 @@ async function loadChannelVideos(channel) {
 ========================= */
 
 async function loadMoreVideos() {
-
-    const container =
-        document.getElementById("channelsContainer");
-
-    const loadMoreContainer =
-        document.getElementById("loadMoreContainer");
+    const container = document.getElementById("channelsContainer");
+    const loadMoreContainer = document.getElementById("loadMoreContainer");
 
     if (!container || !currentChannel) {
         return;
@@ -160,51 +171,37 @@ async function loadMoreVideos() {
     `;
 
     try {
-
         let url =
             `${API_BASE_URL}/api/videos?channelId=` +
             encodeURIComponent(currentChannel.id);
 
         if (nextPageToken) {
-            url +=
-                `&pageToken=${encodeURIComponent(nextPageToken)}`;
+            url += `&pageToken=${encodeURIComponent(nextPageToken)}`;
         }
 
-        const response =
-            await fetch(url);
+        const response = await fetch(url);
 
         if (!response.ok) {
-            throw new Error(
-                "Failed to load videos"
-            );
+            throw new Error("Failed to load videos");
         }
 
-        const data =
-            await response.json();
+        const data = await response.json();
 
-        const videos =
-            data.items || [];
+        const videos = data.items || [];
 
         currentVideos.push(...videos);
 
-        nextPageToken =
-            data.nextPageToken || null;
+        nextPageToken = data.nextPageToken || null;
 
-        displayVideos(
-            currentVideos,
-            currentChannel
-        );
+        displayVideos(currentVideos, currentChannel);
 
         updateLoadMoreButton();
 
     } catch (error) {
-
         console.error(error);
 
         loadMoreContainer.innerHTML = `
-            <p>
-                حدث خطأ أثناء تحميل الفيديوهات.
-            </p>
+            <p>حدث خطأ أثناء تحميل الفيديوهات.</p>
         `;
     }
 }
@@ -215,20 +212,15 @@ async function loadMoreVideos() {
 ========================= */
 
 function displayVideos(videos, channel) {
-
-    const container =
-        document.getElementById("channelsContainer");
+    const container = document.getElementById("channelsContainer");
 
     if (!container) {
         return;
     }
 
     if (videos.length === 0) {
-
         container.innerHTML = `
-            <p>
-                لا توجد فيديوهات متاحة.
-            </p>
+            <p>لا توجد فيديوهات متاحة.</p>
         `;
 
         return;
@@ -237,21 +229,13 @@ function displayVideos(videos, channel) {
     container.innerHTML = "";
 
     videos.forEach(video => {
+        const videoId = video.id.videoId;
+        const title = video.snippet.title;
+        const thumbnail = video.snippet.thumbnails?.medium?.url;
 
-        const videoId =
-            video.id.videoId;
+        const card = document.createElement("div");
 
-        const title =
-            video.snippet.title;
-
-        const thumbnail =
-            video.snippet.thumbnails?.medium?.url;
-
-        const card =
-            document.createElement("div");
-
-        card.className =
-            "channel-card";
+        card.className = "channel-card";
 
         card.innerHTML = `
             ${
@@ -266,13 +250,7 @@ function displayVideos(videos, channel) {
         `;
 
         card.addEventListener("click", () => {
-
-            openVideo(
-                videoId,
-                title,
-                channel
-            );
-
+            openVideo(videoId, title, channel);
         });
 
         container.appendChild(card);
@@ -285,18 +263,13 @@ function displayVideos(videos, channel) {
 ========================= */
 
 function updateLoadMoreButton() {
-
-    const loadMoreContainer =
-        document.getElementById(
-            "loadMoreContainer"
-        );
+    const loadMoreContainer = document.getElementById("loadMoreContainer");
 
     if (!loadMoreContainer) {
         return;
     }
 
     if (nextPageToken) {
-
         loadMoreContainer.innerHTML = `
             <button
                 id="loadMoreButton"
@@ -315,26 +288,16 @@ function updateLoadMoreButton() {
 
         document
             .getElementById("loadMoreButton")
-            .addEventListener(
-                "click",
-                async () => {
+            .addEventListener("click", async () => {
+                const button = document.getElementById("loadMoreButton");
 
-                    const button =
-                        document.getElementById(
-                            "loadMoreButton"
-                        );
+                button.disabled = true;
+                button.textContent = "جاري التحميل...";
 
-                    button.disabled = true;
-
-                    button.textContent =
-                        "جاري التحميل...";
-
-                    await loadMoreVideos();
-                }
-            );
+                await loadMoreVideos();
+            });
 
     } else {
-
         loadMoreContainer.innerHTML = "";
     }
 }
@@ -344,14 +307,8 @@ function updateLoadMoreButton() {
    Video Player
 ========================= */
 
-function openVideo(
-    videoId,
-    title,
-    channel
-) {
-
-    const main =
-        document.querySelector(".main");
+function openVideo(videoId, title, channel) {
+    const main = document.querySelector(".main");
 
     main.innerHTML = `
         <div class="video-page">
@@ -367,31 +324,25 @@ function openVideo(
             <h2>${title}</h2>
 
             <div class="video-wrapper">
-
                 <iframe
                     src="https://www.youtube.com/embed/${videoId}?autoplay=1"
                     title="${title}"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
                 </iframe>
-
             </div>
 
         </div>
     `;
 
+    // Keep the screen awake while the video page is open.
+    setVideoScreenAwake(true);
+
     document
         .getElementById("backToVideos")
-        .addEventListener(
-            "click",
-            () => {
-
-                showChannelVideosAgain(
-                    channel
-                );
-
-            }
-        );
+        .addEventListener("click", () => {
+            showChannelVideosAgain(channel);
+        });
 }
 
 
@@ -400,9 +351,9 @@ function openVideo(
 ========================= */
 
 function showChannelVideosAgain(channel) {
+    setVideoScreenAwake(false);
 
-    const main =
-        document.querySelector(".main");
+    const main = document.querySelector(".main");
 
     main.innerHTML = `
         <button
@@ -415,27 +366,18 @@ function showChannelVideosAgain(channel) {
 
         <h2>${channel.name}</h2>
 
-        <div
-            id="channelsContainer"
-            class="channels-container"
-        ></div>
+        <div id="channelsContainer" class="channels-container"></div>
 
         <div id="loadMoreContainer"></div>
     `;
 
     document
         .getElementById("backToChannels")
-        .addEventListener(
-            "click",
-            () => {
-                showChannels();
-            }
-        );
+        .addEventListener("click", () => {
+            showChannels();
+        });
 
-    displayVideos(
-        currentVideos,
-        channel
-    );
+    displayVideos(currentVideos, channel);
 
     updateLoadMoreButton();
 }
@@ -446,26 +388,16 @@ function showChannelVideosAgain(channel) {
 ========================= */
 
 function toggleTheme() {
-
     document.body.classList.toggle("dark");
 
-    if (
-        document.body.classList.contains("dark")
-    ) {
-
+    if (document.body.classList.contains("dark")) {
         themeButton.textContent = "☀️";
-
     } else {
-
         themeButton.textContent = "🌙";
     }
 }
 
-
-themeButton.addEventListener(
-    "click",
-    toggleTheme
-);
+themeButton.addEventListener("click", toggleTheme);
 
 
 /* =========================
