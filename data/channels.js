@@ -1,3 +1,4 @@
+
 const channels = [
     {
         id: "UCJlu6BjPWHZhzuCc0zVME0Q"
@@ -34,5 +35,14 @@ const channels = [
     },
     {
         id: "UC9B6J4qn5M_TLMh7zX0ISBA"
+    },
+    {
+        id: "UCDPk9MG2RexnOMGTD-YnSnA"
+    },
+    {
+        id: "UCR7t5Okz1WlO5WktFE2iKWA"
+    },
+    {
+        id: "UCwmZiChSryoWQCZMIQezgTg"
     }
 ];
