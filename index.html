@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <meta name="theme-color" content="#ffffff">
     <title>MeTube</title>
 
     <link rel="stylesheet" href="style.css">
@@ -12,10 +14,30 @@
 <body>
 
     <header class="header">
-        <h1>MeTube</h1>
+        <a class="brand" href="#" id="homeButton" aria-label="MeTube home">
+            <span class="brand-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <rect x="2" y="4" width="20" height="16" rx="5" fill="currentColor"/>
+                    <path d="M10 8.5L16 12L10 15.5V8.5Z" fill="var(--brand-play-color)"/>
+                </svg>
+            </span>
+            <h1>MeTube</h1>
+        </a>
 
-        <button id="themeButton" type="button">
-            🌙
+        <button
+            id="themeButton"
+            class="icon-button"
+            type="button"
+            aria-label="Switch to dark mode"
+            title="Change theme"
+        >
+            <svg class="theme-icon" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round"
+                 aria-hidden="true">
+                <path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5
+                         8.5 8.5 0 1 0 20.5 15.5Z"/>
+            </svg>
         </button>
     </header>
 
