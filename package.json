@@ -1,3 +1,4 @@
+
 {
   "name": "metube",
   "version": "1.0.0",
@@ -7,11 +8,13 @@
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
-    "@capacitor/android": "^8.5.2"
+    "@capacitor/android": "^8.5.2",
+    "@capgo/capacitor-keep-awake": "^8.1.15"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.5.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "esbuild": "^0.25.0"
   }
 }
