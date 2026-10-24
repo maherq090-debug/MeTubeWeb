@@ -539,3 +539,78 @@ body.dark #loadMoreButton {
         animation-duration: 0.01ms !important;
     }
 }
+
+
+/* Channel Videos / Playlists Tabs */
+.channel-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 12px 0 22px;
+    border-bottom: 1px solid var(--border-color, #e5e5e5);
+    padding-bottom: 10px;
+}
+
+.channel-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid var(--border-color, #e5e5e5);
+    border-radius: 10px;
+    background: var(--card-background, #ffffff);
+    color: var(--text-color, #222222);
+    font: inherit;
+    cursor: pointer;
+}
+
+.channel-tab svg {
+    width: 20px;
+    height: 20px;
+}
+
+.channel-tab.active {
+    background: var(--text-color, #222222);
+    color: var(--background-color, #ffffff);
+}
+
+.channel-tab:focus-visible {
+    outline: 2px solid #777;
+    outline-offset: 3px;
+}
+
+.card-subtitle,
+.page-message {
+    color: var(--secondary-text-color, #777777);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.card-subtitle {
+    margin: 8px 0 0;
+}
+
+.page-message {
+    padding: 12px 0;
+}
+
+body.dark .channel-tab {
+    background: var(--card-background, #222328);
+    color: var(--text-color, #ffffff);
+}
+
+body.dark .channel-tab.active {
+    background: var(--text-color, #ffffff);
+    color: var(--background-color, #191a1e);
+}
+
+@media (max-width: 480px) {
+    .channel-tabs {
+        gap: 8px;
+    }
+
+    .channel-tab {
+        flex: 1;
+        padding: 10px 8px;
+    }
+}
