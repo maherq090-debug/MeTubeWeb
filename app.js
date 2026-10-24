@@ -1,5 +1,6 @@
 
 const themeButton = document.getElementById("themeButton");
+const homeButton = document.getElementById("homeButton");
 
 const API_BASE_URL = "https://metube-api.maherq090.workers.dev";
 
@@ -7,6 +8,50 @@ let currentChannel = null;
 let nextPageToken = null;
 let currentVideos = [];
 let channelData = [];
+let isLoadingVideos = false;
+
+
+/* =========================
+   SVG Icons
+========================= */
+
+function getIcon(name) {
+    const icons = {
+        moon: `
+            <path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5
+                     8.5 8.5 0 1 0 20.5 15.5Z"/>
+        `,
+        sun: `
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2"/>
+            <path d="M12 20v2"/>
+            <path d="m4.93 4.93 1.41 1.41"/>
+            <path d="m17.66 17.66 1.41 1.41"/>
+            <path d="M2 12h2"/>
+            <path d="M20 12h2"/>
+            <path d="m6.34 17.66-1.41 1.41"/>
+            <path d="m19.07 4.93-1.41 1.41"/>
+        `,
+        back: `
+            <path d="m15 18-6-6 6-6"/>
+        `
+    };
+
+    return `
+        <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+        >
+            ${icons[name] || ""}
+        </svg>
+    `;
+}
 
 
 /* =========================
@@ -27,11 +72,86 @@ async function setVideoScreenAwake(enabled) {
             await keepAwake.allowSleep();
         }
     } catch (error) {
-        console.error(
-            "Failed to update screen awake state:",
-            error
-        );
+        console.error("Failed to update screen awake state:", error);
     }
+}
+
+
+/* =========================
+   Safe Text Helpers
+========================= */
+
+function createTextElement(tag, className, text) {
+    const element = document.createElement(tag);
+
+    if (className) {
+        element.className = className;
+    }
+
+    element.textContent = text ?? "";
+
+    return element;
+}
+
+function createBackButton(id, label = "Back") {
+    const button = document.createElement("button");
+
+    button.type = "button";
+    button.id = id;
+    button.className = "back-button";
+    button.setAttribute("aria-label", label);
+
+    button.innerHTML = `${getIcon("back")}<span></span>`;
+    button.querySelector("span").textContent = label;
+
+    return button;
+}
+
+
+/* =========================
+   Create Channel / Video Card
+========================= */
+
+function createCard(imageUrl, title, onClick) {
+    const card = document.createElement("div");
+
+    card.className = "channel-card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", title || "Open item");
+
+    if (imageUrl) {
+        const image = document.createElement("img");
+
+        image.src = imageUrl;
+        image.alt = title || "";
+        image.loading = "lazy";
+        image.decoding = "async";
+
+        image.addEventListener("error", () => {
+            image.remove();
+        }, { once: true });
+
+        card.appendChild(image);
+    }
+
+    const content = document.createElement("div");
+    content.className = "channel-card-content";
+
+    const heading = createTextElement("h3", "", title);
+    content.appendChild(heading);
+    card.appendChild(content);
+
+    card.addEventListener("click", onClick);
+
+    card.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onClick();
+        }
+    });
+
+    return card;
 }
 
 
@@ -63,11 +183,19 @@ async function loadChannels() {
         console.error(error);
 
         const main = document.querySelector(".main");
+        main.replaceChildren();
 
-        main.innerHTML = `
-            <h2>Channels</h2>
-            <p>حدث خطأ أثناء تحميل القنوات.</p>
-        `;
+        main.appendChild(
+            createTextElement("h2", "", "Channels")
+        );
+
+        main.appendChild(
+            createTextElement(
+                "p",
+                "",
+                "حدث خطأ أثناء تحميل القنوات. حاول مرة أخرى."
+            )
+        );
     }
 }
 
@@ -80,38 +208,27 @@ function showChannels() {
     setVideoScreenAwake(false);
 
     const main = document.querySelector(".main");
+    main.replaceChildren();
 
-    main.innerHTML = `
-        <h2>Channels</h2>
+    main.appendChild(
+        createTextElement("h2", "", "Channels")
+    );
 
-        <div id="channelsContainer" class="channels-container"></div>
-    `;
-
-    const container = document.getElementById("channelsContainer");
+    const container = document.createElement("div");
+    container.id = "channelsContainer";
+    container.className = "channels-container";
 
     channelData.forEach(channel => {
-        const card = document.createElement("div");
-
-        card.className = "channel-card";
-
-        card.innerHTML = `
-            ${
-                channel.image
-                    ? `<img src="${channel.image}" alt="${channel.name}">`
-                    : ""
-            }
-
-            <div class="channel-card-content">
-                <h3>${channel.name}</h3>
-            </div>
-        `;
-
-        card.addEventListener("click", () => {
-            loadChannelVideos(channel);
-        });
+        const card = createCard(
+            channel.image,
+            channel.name,
+            () => loadChannelVideos(channel)
+        );
 
         container.appendChild(card);
     });
+
+    main.appendChild(container);
 }
 
 
@@ -123,32 +240,35 @@ async function loadChannelVideos(channel) {
     currentChannel = channel;
     nextPageToken = null;
     currentVideos = [];
+    isLoadingVideos = false;
 
     const main = document.querySelector(".main");
+    main.replaceChildren();
 
-    main.innerHTML = `
-        <button
-            class="back-button"
-            id="backToChannels"
-            type="button"
-        >
-            ← Back
-        </button>
+    const backButton = createBackButton("backToChannels");
 
-        <h2>${channel.name}</h2>
+    backButton.addEventListener("click", () => {
+        showChannels();
+    });
 
-        <div id="channelsContainer" class="channels-container">
-            <p>جاري تحميل الفيديوهات...</p>
-        </div>
+    main.appendChild(backButton);
+    main.appendChild(
+        createTextElement("h2", "", channel.name)
+    );
 
-        <div id="loadMoreContainer"></div>
-    `;
+    const container = document.createElement("div");
+    container.id = "channelsContainer";
+    container.className = "channels-container";
 
-    document
-        .getElementById("backToChannels")
-        .addEventListener("click", () => {
-            showChannels();
-        });
+    container.appendChild(
+        createTextElement("p", "", "جاري تحميل الفيديوهات...")
+    );
+
+    main.appendChild(container);
+
+    const loadMoreContainer = document.createElement("div");
+    loadMoreContainer.id = "loadMoreContainer";
+    main.appendChild(loadMoreContainer);
 
     await loadMoreVideos();
 }
@@ -162,13 +282,19 @@ async function loadMoreVideos() {
     const container = document.getElementById("channelsContainer");
     const loadMoreContainer = document.getElementById("loadMoreContainer");
 
-    if (!container || !currentChannel) {
+    if (!container || !currentChannel || isLoadingVideos) {
         return;
     }
 
-    loadMoreContainer.innerHTML = `
-        <p>جاري تحميل المزيد...</p>
-    `;
+    isLoadingVideos = true;
+
+    if (loadMoreContainer) {
+        loadMoreContainer.replaceChildren();
+
+        loadMoreContainer.appendChild(
+            createTextElement("p", "", "جاري تحميل المزيد...")
+        );
+    }
 
     try {
         let url =
@@ -194,15 +320,24 @@ async function loadMoreVideos() {
         nextPageToken = data.nextPageToken || null;
 
         displayVideos(currentVideos, currentChannel);
-
         updateLoadMoreButton();
 
     } catch (error) {
         console.error(error);
 
-        loadMoreContainer.innerHTML = `
-            <p>حدث خطأ أثناء تحميل الفيديوهات.</p>
-        `;
+        if (loadMoreContainer) {
+            loadMoreContainer.replaceChildren();
+
+            loadMoreContainer.appendChild(
+                createTextElement(
+                    "p",
+                    "",
+                    "حدث خطأ أثناء تحميل الفيديوهات."
+                )
+            );
+        }
+    } finally {
+        isLoadingVideos = false;
     }
 }
 
@@ -218,40 +353,35 @@ function displayVideos(videos, channel) {
         return;
     }
 
+    container.replaceChildren();
+
     if (videos.length === 0) {
-        container.innerHTML = `
-            <p>لا توجد فيديوهات متاحة.</p>
-        `;
+        container.appendChild(
+            createTextElement("p", "", "لا توجد فيديوهات متاحة.")
+        );
 
         return;
     }
 
-    container.innerHTML = "";
-
     videos.forEach(video => {
-        const videoId = video.id.videoId;
-        const title = video.snippet.title;
-        const thumbnail = video.snippet.thumbnails?.medium?.url;
+        const videoId = video.id?.videoId;
+        const title = video.snippet?.title || "Untitled video";
 
-        const card = document.createElement("div");
+        const thumbnail =
+            video.snippet?.thumbnails?.medium?.url ||
+            video.snippet?.thumbnails?.high?.url ||
+            video.snippet?.thumbnails?.default?.url ||
+            "";
 
-        card.className = "channel-card";
+        if (!videoId) {
+            return;
+        }
 
-        card.innerHTML = `
-            ${
-                thumbnail
-                    ? `<img src="${thumbnail}" alt="${title}">`
-                    : ""
-            }
-
-            <div class="channel-card-content">
-                <h3>${title}</h3>
-            </div>
-        `;
-
-        card.addEventListener("click", () => {
-            openVideo(videoId, title, channel);
-        });
+        const card = createCard(
+            thumbnail,
+            title,
+            () => openVideo(videoId, title, channel)
+        );
 
         container.appendChild(card);
     });
@@ -269,37 +399,30 @@ function updateLoadMoreButton() {
         return;
     }
 
-    if (nextPageToken) {
-        loadMoreContainer.innerHTML = `
-            <button
-                id="loadMoreButton"
-                type="button"
-                style="
-                    display: block;
-                    margin: 30px auto;
-                    padding: 12px 24px;
-                    font-size: 16px;
-                    cursor: pointer;
-                "
-            >
-                Load more
-            </button>
-        `;
+    loadMoreContainer.replaceChildren();
 
-        document
-            .getElementById("loadMoreButton")
-            .addEventListener("click", async () => {
-                const button = document.getElementById("loadMoreButton");
-
-                button.disabled = true;
-                button.textContent = "جاري التحميل...";
-
-                await loadMoreVideos();
-            });
-
-    } else {
-        loadMoreContainer.innerHTML = "";
+    if (!nextPageToken) {
+        return;
     }
+
+    const button = document.createElement("button");
+
+    button.id = "loadMoreButton";
+    button.type = "button";
+    button.textContent = "Load more";
+
+    button.addEventListener("click", async () => {
+        if (isLoadingVideos) {
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "جاري التحميل...";
+
+        await loadMoreVideos();
+    });
+
+    loadMoreContainer.appendChild(button);
 }
 
 
@@ -309,40 +432,43 @@ function updateLoadMoreButton() {
 
 function openVideo(videoId, title, channel) {
     const main = document.querySelector(".main");
+    main.replaceChildren();
 
-    main.innerHTML = `
-        <div class="video-page">
+    const page = document.createElement("div");
+    page.className = "video-page";
 
-            <button
-                class="back-button"
-                id="backToVideos"
-                type="button"
-            >
-                ← Back
-            </button>
+    const backButton = createBackButton("backToVideos");
 
-            <h2>${title}</h2>
+    backButton.addEventListener("click", () => {
+        showChannelVideosAgain(channel);
+    });
 
-            <div class="video-wrapper">
-                <iframe
-                    src="https://www.youtube.com/embed/${videoId}?autoplay=1"
-                    title="${title}"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-                </iframe>
-            </div>
+    page.appendChild(backButton);
 
-        </div>
-    `;
+    page.appendChild(
+        createTextElement("h2", "", title)
+    );
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "video-wrapper";
+
+    const iframe = document.createElement("iframe");
+
+    iframe.src =
+        `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?autoplay=1`;
+
+    iframe.title = title;
+    iframe.allow =
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+    iframe.allowFullscreen = true;
+    iframe.referrerPolicy = "strict-origin-when-cross-origin";
+
+    wrapper.appendChild(iframe);
+    page.appendChild(wrapper);
+    main.appendChild(page);
 
     // Keep the screen awake while the video page is open.
     setVideoScreenAwake(true);
-
-    document
-        .getElementById("backToVideos")
-        .addEventListener("click", () => {
-            showChannelVideosAgain(channel);
-        });
 }
 
 
@@ -354,31 +480,32 @@ function showChannelVideosAgain(channel) {
     setVideoScreenAwake(false);
 
     const main = document.querySelector(".main");
+    main.replaceChildren();
 
-    main.innerHTML = `
-        <button
-            class="back-button"
-            id="backToChannels"
-            type="button"
-        >
-            ← Back
-        </button>
+    const backButton = createBackButton("backToChannels");
 
-        <h2>${channel.name}</h2>
+    backButton.addEventListener("click", () => {
+        showChannels();
+    });
 
-        <div id="channelsContainer" class="channels-container"></div>
+    main.appendChild(backButton);
 
-        <div id="loadMoreContainer"></div>
-    `;
+    main.appendChild(
+        createTextElement("h2", "", channel.name)
+    );
 
-    document
-        .getElementById("backToChannels")
-        .addEventListener("click", () => {
-            showChannels();
-        });
+    const container = document.createElement("div");
+    container.id = "channelsContainer";
+    container.className = "channels-container";
+
+    main.appendChild(container);
+
+    const loadMoreContainer = document.createElement("div");
+    loadMoreContainer.id = "loadMoreContainer";
+
+    main.appendChild(loadMoreContainer);
 
     displayVideos(currentVideos, channel);
-
     updateLoadMoreButton();
 }
 
@@ -387,21 +514,46 @@ function showChannelVideosAgain(channel) {
    Dark / Light Mode
 ========================= */
 
+function updateThemeButton() {
+    const isDark = document.body.classList.contains("dark");
+
+    themeButton.innerHTML = getIcon(isDark ? "sun" : "moon");
+
+    themeButton.setAttribute(
+        "aria-label",
+        isDark ? "Switch to light mode" : "Switch to dark mode"
+    );
+
+    themeButton.title = isDark ? "Light mode" : "Dark mode";
+
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+
+    if (themeColor) {
+        themeColor.content = isDark ? "#191a1e" : "#ffffff";
+    }
+}
+
 function toggleTheme() {
     document.body.classList.toggle("dark");
-
-    if (document.body.classList.contains("dark")) {
-        themeButton.textContent = "☀️";
-    } else {
-        themeButton.textContent = "🌙";
-    }
+    updateThemeButton();
 }
 
 themeButton.addEventListener("click", toggleTheme);
 
 
 /* =========================
+   Home Button
+========================= */
+
+homeButton.addEventListener("click", event => {
+    event.preventDefault();
+    showChannels();
+});
+
+
+/* =========================
    Start App
 ========================= */
 
+updateThemeButton();
 loadChannels();
