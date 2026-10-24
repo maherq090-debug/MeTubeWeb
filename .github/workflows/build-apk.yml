@@ -1,3 +1,4 @@
+
 name: Build MeTube APK
 
 on:
@@ -26,6 +27,30 @@ jobs:
           cp style.css www/
           cp app.js www/
           cp -r data www/
+
+      - name: Build Keep Awake bridge
+        run: |
+          npx esbuild keep-awake-entry.js \
+            --bundle \
+            --format=iife \
+            --outfile=www/keep-awake.js
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("www/index.html")
+          html = path.read_text()
+
+          if 'src="keep-awake.js"' not in html:
+              if "</body>" not in html:
+                  raise SystemExit("Could not find </body> in index.html")
+
+              html = html.replace(
+                  "</body>",
+                  '    <script src="keep-awake.js"></script>\n</body>'
+              )
+              path.write_text(html)
+          PY
 
       - name: Add Android platform
         run: npx cap add android
