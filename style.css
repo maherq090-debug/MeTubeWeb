@@ -1,27 +1,27 @@
 
-/* ================================
-   MeTube — Modern Minimal UI
-   ================================ */
+/* =====================================
+   MeTube — Modern Minimal Design
+   ===================================== */
 
 :root {
     color-scheme: light;
 
     --bg: #ffffff;
     --surface: #ffffff;
-    --surface-hover: #f7f7f8;
-    --text: #171717;
-    --text-secondary: #737373;
-    --border: #e8e8eb;
-    --accent: #18181b;
-    --accent-text: #ffffff;
-    --video-bg: #000000;
+    --surface-hover: #f5f6f8;
+    --text: #17181c;
+    --muted: #747782;
+    --border: #e7e8ec;
+    --brand: #202127;
+    --brand-play-color: #ffffff;
+    --focus: #7c8cff;
 
     --radius-sm: 10px;
     --radius-md: 14px;
     --radius-lg: 18px;
 
-    --page-width: 1120px;
-    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.035);
+    --page-width: 1180px;
+    --shadow: 0 2px 10px rgba(20, 24, 35, 0.035);
     --transition: 180ms ease;
 }
 
@@ -43,32 +43,30 @@ body {
     color: var(--text);
     line-height: 1.5;
     -webkit-tap-highlight-color: transparent;
-    transition:
-        background-color var(--transition),
-        color var(--transition);
-}
-
-button {
-    font: inherit;
+    transition: background-color var(--transition), color var(--transition);
 }
 
 button,
-.channel-card {
+a {
+    font: inherit;
     -webkit-tap-highlight-color: transparent;
 }
 
+button {
+    color: inherit;
+}
+
 button:focus-visible,
+a:focus-visible,
 .channel-card:focus-visible {
-    outline: 3px solid #8b9cff;
+    outline: 3px solid var(--focus);
     outline-offset: 3px;
 }
 
-/* ================================
-   Header
-   ================================ */
+/* Header */
 
 .header {
-    min-height: 68px;
+    min-height: 70px;
     padding: 12px 28px;
     display: flex;
     align-items: center;
@@ -83,6 +81,35 @@ button:focus-visible,
     z-index: 20;
 }
 
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+
+    color: var(--text);
+    text-decoration: none;
+}
+
+.brand-icon {
+    width: 39px;
+    height: 39px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    border-radius: 12px;
+    background: var(--brand);
+    color: var(--brand-play-color);
+}
+
+.brand-icon svg {
+    display: block;
+    width: 23px;
+    height: 23px;
+}
+
 .header h1 {
     font-size: 25px;
     line-height: 1.2;
@@ -90,17 +117,13 @@ button:focus-visible,
     letter-spacing: -0.7px;
 }
 
-.header button {
+/* Icon buttons */
+
+.icon-button {
+    width: 43px;
+    height: 43px;
     flex-shrink: 0;
-}
 
-/* ================================
-   Theme button
-   ================================ */
-
-#themeButton {
-    width: 42px;
-    height: 42px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -110,58 +133,54 @@ button:focus-visible,
     background: var(--surface);
     color: var(--text);
 
-    font-size: 21px;
     cursor: pointer;
-
     transition:
         background-color var(--transition),
-        transform var(--transition),
-        border-color var(--transition);
+        border-color var(--transition),
+        transform var(--transition);
 }
 
-#themeButton:hover {
+.icon-button:hover {
     background: var(--surface-hover);
 }
 
-#themeButton:active {
+.icon-button:active {
     transform: scale(0.94);
 }
 
-/* ================================
-   Main content
-   ================================ */
+.theme-icon {
+    width: 21px;
+    height: 21px;
+    display: block;
+}
+
+/* Main content */
 
 .main {
     width: 100%;
     max-width: var(--page-width);
     margin: 0 auto;
-    padding: 34px 28px 48px;
+    padding: 36px 28px 52px;
 }
 
-.main h2 {
-    margin-bottom: 24px;
-    font-size: 24px;
-    line-height: 1.35;
+.main > h2,
+.main > .video-page > h2 {
+    margin-bottom: 25px;
+    font-size: 25px;
+    line-height: 1.4;
     font-weight: 700;
-    letter-spacing: -0.4px;
+    letter-spacing: -0.45px;
+    overflow-wrap: anywhere;
 }
 
-/* ================================
-   Channels grid
-   ================================ */
+/* Channel and video grids */
 
 .channels-container {
     display: grid;
-    grid-template-columns: repeat(
-        auto-fill,
-        minmax(min(100%, 230px), 1fr)
-    );
-    gap: 22px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: start;
+    gap: 23px;
 }
-
-/* ================================
-   Channel cards
-   ================================ */
 
 .channel-card {
     min-width: 0;
@@ -170,19 +189,19 @@ button:focus-visible,
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--surface);
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow);
 
     cursor: pointer;
 
     transition:
         transform var(--transition),
-        box-shadow var(--transition),
-        border-color var(--transition);
+        border-color var(--transition),
+        box-shadow var(--transition);
 }
 
 .channel-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 9px 24px rgba(20, 24, 35, 0.075);
 }
 
 .channel-card:active {
@@ -198,56 +217,56 @@ button:focus-visible,
 }
 
 .channel-card-content {
-    padding: 16px;
+    padding: 15px 16px 17px;
 }
 
 .channel-card-content h3 {
     color: var(--text);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 650;
     line-height: 1.5;
+    overflow-wrap: anywhere;
 
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     overflow: hidden;
-    overflow-wrap: anywhere;
 }
 
-/* ================================
-   Video page
-   ================================ */
+/* Loading and error messages */
 
-.video-page {
-    width: 100%;
-    min-width: 0;
+.channels-container > p,
+#loadMoreContainer > p,
+.main > p {
+    grid-column: 1 / -1;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.7;
 }
 
-/* Consistent back button */
+/* Back button */
 
 .back-button {
-    min-height: 42px;
+    min-height: 43px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 9px;
 
-    margin: 0 0 22px;
+    margin: 0 0 23px;
     padding: 9px 15px;
 
     border: 1px solid var(--border);
-    border-radius: 11px;
-
+    border-radius: 12px;
     background: var(--surface);
     color: var(--text);
 
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 650;
     line-height: 1.2;
 
     cursor: pointer;
-
     transition:
         background-color var(--transition),
         border-color var(--transition),
@@ -262,61 +281,108 @@ button:focus-visible,
     transform: scale(0.97);
 }
 
+.back-button svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Video page */
+
+.video-page {
+    width: 100%;
+    min-width: 0;
+}
+
 .video-page h2 {
-    margin: 0 0 22px;
+    margin-bottom: 23px;
     color: var(--text);
-    font-size: 23px;
+    font-size: 24px;
+    line-height: 1.5;
     font-weight: 700;
-    line-height: 1.45;
     letter-spacing: -0.3px;
     overflow-wrap: anywhere;
 }
 
-/* ================================
-   Video player
-   ================================ */
+/* Video player */
 
 .video-wrapper {
-    width: 100%;
     position: relative;
+    width: 100%;
     aspect-ratio: 16 / 9;
-
     overflow: hidden;
-    border-radius: var(--radius-lg);
-    background: var(--video-bg);
 
+    border-radius: var(--radius-lg);
+    background: #000000;
     box-shadow: 0 5px 22px rgba(0, 0, 0, 0.09);
 }
 
 .video-wrapper iframe {
     position: absolute;
     inset: 0;
-
     display: block;
     width: 100%;
     height: 100%;
-
     border: 0;
 }
 
-/* ================================
-   Dark mode
-   ================================ */
+/* Load more */
+
+#loadMoreContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+}
+
+#loadMoreButton {
+    min-height: 46px;
+    min-width: 150px;
+    padding: 12px 23px;
+
+    border: 1px solid var(--brand);
+    border-radius: 12px;
+    background: var(--brand);
+    color: var(--brand-play-color);
+
+    font-size: 14px;
+    font-weight: 650;
+    cursor: pointer;
+
+    transition:
+        opacity var(--transition),
+        transform var(--transition);
+}
+
+#loadMoreButton:hover {
+    opacity: 0.88;
+}
+
+#loadMoreButton:active {
+    transform: scale(0.98);
+}
+
+#loadMoreButton:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+/* Dark mode */
 
 body.dark {
     color-scheme: dark;
 
-    --bg: #101113;
-    --surface: #18191c;
-    --surface-hover: #242529;
-    --text: #f4f4f5;
-    --text-secondary: #a1a1aa;
-    --border: #303136;
-    --accent: #f4f4f5;
-    --accent-text: #18181b;
-    --video-bg: #000000;
+    --bg: #111214;
+    --surface: #191a1e;
+    --surface-hover: #25262b;
+    --text: #f3f4f6;
+    --muted: #a1a4ae;
+    --border: #303137;
+    --brand: #f0f1f4;
+    --brand-play-color: #191a1e;
+    --focus: #9aa8ff;
 
-    --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.12);
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
 }
 
 body.dark .header {
@@ -324,13 +390,14 @@ body.dark .header {
     border-bottom-color: var(--border);
 }
 
-body.dark #themeButton {
+body.dark .icon-button {
     background: var(--surface);
     color: var(--text);
     border-color: var(--border);
 }
 
-body.dark #themeButton:hover {
+body.dark .icon-button:hover,
+body.dark .back-button:hover {
     background: var(--surface-hover);
 }
 
@@ -341,7 +408,7 @@ body.dark .channel-card {
 }
 
 body.dark .channel-card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
 }
 
 body.dark .channel-card-content h3,
@@ -351,68 +418,65 @@ body.dark .video-page h2 {
 
 body.dark .back-button {
     background: var(--surface);
-    color: var(--text);
     border-color: var(--border);
+    color: var(--text);
 }
 
-body.dark .back-button:hover {
-    background: var(--surface-hover);
+body.dark #loadMoreButton {
+    background: var(--brand);
+    color: var(--brand-play-color);
+    border-color: var(--brand);
 }
 
-body.dark .video-wrapper {
-    background: var(--video-bg);
-}
+/* Tablet */
 
-/* ================================
-   Tablet layout
-   ================================ */
-
-@media (min-width: 768px) {
-    .main {
-        padding-top: 38px;
-    }
-
+@media (max-width: 1000px) {
     .channels-container {
-        gap: 24px;
-    }
-
-    .channel-card-content {
-        padding: 18px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 19px;
     }
 }
 
-/* ================================
-   Mobile layout
-   ================================ */
+/* Small tablets and phones */
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
     .header {
-        min-height: 60px;
-        padding: 10px 16px;
+        min-height: 62px;
+        padding: 10px 17px;
+    }
+
+    .brand {
+        gap: 9px;
+    }
+
+    .brand-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
     }
 
     .header h1 {
         font-size: 23px;
     }
 
-    #themeButton {
-        width: 40px;
-        height: 40px;
-        font-size: 20px;
+    .icon-button {
+        width: 41px;
+        height: 41px;
     }
 
     .main {
-        padding: 24px 16px 36px;
+        padding: 26px 17px 38px;
     }
 
-    .main h2 {
-        margin-bottom: 19px;
-        font-size: 21px;
+    .main > h2,
+    .main > .video-page > h2 {
+        margin-bottom: 20px;
+        font-size: 22px;
     }
 
     .channels-container {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 13px;
+        gap: 14px;
     }
 
     .channel-card {
@@ -420,7 +484,7 @@ body.dark .video-wrapper {
     }
 
     .channel-card-content {
-        padding: 11px;
+        padding: 11px 12px 13px;
     }
 
     .channel-card-content h3 {
@@ -429,13 +493,13 @@ body.dark .video-wrapper {
     }
 
     .back-button {
-        min-height: 40px;
-        margin-bottom: 18px;
-        padding: 8px 12px;
+        min-height: 41px;
+        margin-bottom: 19px;
+        padding: 8px 13px;
     }
 
     .video-page h2 {
-        margin-bottom: 17px;
+        margin-bottom: 18px;
         font-size: 20px;
     }
 
@@ -444,19 +508,27 @@ body.dark .video-wrapper {
     }
 }
 
-/* Narrow phones */
+/* Very narrow phones */
 
 @media (max-width: 350px) {
+    .header {
+        padding-inline: 12px;
+    }
+
+    .main {
+        padding-inline: 12px;
+    }
+
     .channels-container {
-        grid-template-columns: 1fr;
+        gap: 10px;
     }
 
     .channel-card-content {
-        padding: 13px;
+        padding: 9px;
     }
 }
 
-/* Respect reduced motion preferences */
+/* Reduced motion */
 
 @media (prefers-reduced-motion: reduce) {
     *,
